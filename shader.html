@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style>
+			body {
+				background-color: #ffffff;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
+
+		<script id="simplevs" type="x-shader/x-vertex">
+
+			// 5: uniform mat4 modelMatrix;
+			// 36: uniform mat4 modelViewMatrix;
+			// 37: uniform mat4 projectionMatrix;
+			// 38: uniform mat4 viewMatrix;
+			// 39: uniform mat3 normalMatrix;
+			// 40: uniform vec3 cameraPosition;
+			// 41: attribute vec3 position;
+			// 42: attribute vec3 normal;
+			// 43: attribute vec2 uv;
+			// 44: attribute vec2 uv2;
+			// 45: #ifdef USE_COLOR
+			// 46: attribute vec3 color;
+
+			uniform vec4 LightPosition;
+			uniform vec3 La;
+			uniform vec3 Ld;
+			uniform vec3 Ls;
+
+			uniform vec3 Ka;
+			uniform vec3 Kd;
+			uniform vec3 Ks;
+			uniform float Shininess;
+
+			varying vec3 LightIntensity;
+
+			void main(void) {
+				vec3 tnorm = normalize(vec3(normalMatrix * normal));
+				vec4 eyeCoords = modelViewMatrix * vec4(position, 1.0);
+				vec3 s = normalize(vec3(LightPosition - eyeCoords));
+				vec3 v = normalize(-eyeCoords.xyz);
+				LightIntensity = vec3(0.2, 0.4, 0.1);
+			    gl_Position = projectionMatrix * eyeCoords;
+			}
+
+		</script>
+
+		<script id="simplefs" type="x-shader/x-fragment">
+			
+			varying vec3 LightIntensity;
+
+			void main(void) {
+				vec4 FinalColor = vec4(LightIntensity, 1.0);
+			    gl_FragColor = FinalColor;
+			}
+
+		</script>
+
+
+		<script>
+							
+			var camera, scene, renderer;
+			var geometry, material, mesh;
+
+			init();
+			animate();
+
+			function init() {
+				
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.z = 500;
+
+				scene = new THREE.Scene();
+
+				var uniforms = {
+					LightPosition: {type:"v4", value: new THREE.Vector4(0.1, 0.2, 0.5, 1.0)},
+					La: {type:"v3", value: new THREE.Vector3(0.3, 0.2, 0.6)},
+					Ld: {type:"v3", value: new THREE.Vector3(0.2, 0.5, 0.4)},
+					Ls: {type:"v3", value: new THREE.Vector3(0.1, 0.2, 0.3)},
+
+					Ka: {type:"v3", value: new THREE.Vector3(0.3, 0.6, 0.4)},
+					Kd: {type:"v3", value: new THREE.Vector3(0.3, 0.6, 0.9)},
+					Ks: {type:"v3", value: new THREE.Vector3(0.2, 0.5, 0.3)},
+					Shininess: {type:"f", value: 0.1}
+				};
+				var attributes = {};
+
+				var vertShader = document.getElementById("simplevs").innerHTML;
+				var fragShader = document.getElementById("simplefs").innerHTML;
+				var material = new THREE.ShaderMaterial({
+					attributes: attributes,
+					uniforms: uniforms,
+				    vertexShader : vertShader,
+				    fragmentShader: fragShader
+				});
+
+				geometry = new THREE.IcosahedronGeometry( 200, 1 );
+				// material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+				mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				document.body.appendChild( renderer.domElement );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				mesh.rotation.x = Date.now() * 0.0005;
+				mesh.rotation.y = Date.now() * 0.001;
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>

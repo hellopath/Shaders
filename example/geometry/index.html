@@ -1,0 +1,51 @@
+<html>
+<head>
+	<title>Flower</title>
+	<script>
+		var gl = null;
+
+		function setup()
+		{
+			var canvas = document.getElementById("canvas");
+
+			if(canvas == null)
+			{
+				alert("error");
+				return;
+			}
+
+			var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
+
+			for(var i = 0; i < names.length; i++)
+			{
+				try
+				{
+					gl = canvas.getContext(names[i]);
+				}
+				catch(e) {}
+
+				if(gl)
+				{
+					break;
+				}
+			}
+
+			if(gl == null)
+			{
+				alert("WebGL is not available");
+			}
+			else
+			{
+				alert("Everything is ok");
+			}
+		}
+
+	</script>
+
+</head>
+<body onLoad="setup()">
+<canvas id="canvas" width="800" height="600">
+Your browser does not support the HTML5 canvas element.
+</canvas>
+</body>
+</html>
